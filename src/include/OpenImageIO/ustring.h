@@ -194,7 +194,7 @@ public:
         m_chars = make_unique(sref);
     }
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     /// Construct from a known ustringhash
     inline explicit ustring(ustringhash hash);
 #endif
@@ -799,7 +799,7 @@ public:
 
     /// Construct a ustringhash from a null-terminated C string (char *).
     OIIO_DEVICE_CONSTEXPR explicit ustringhash(const char* str)
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
         // GPU: just compute the hash. This can be constexpr!
         : m_hash(Strutil::strhash(str))
 #else
@@ -811,7 +811,7 @@ public:
     }
 
     OIIO_DEVICE_CONSTEXPR explicit ustringhash(const char* str, size_t len)
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
         // GPU: just compute the hash. This can be constexpr!
         : m_hash(Strutil::strhash(len, str))
 #else
@@ -825,7 +825,7 @@ public:
     /// Construct a ustringhash from a string_view, which can be
     /// auto-converted from either a std::string.
     OIIO_DEVICE_CONSTEXPR explicit ustringhash(string_view str)
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
         // GPU: just compute the hash. This can be constexpr!
         : m_hash(Strutil::strhash(str))
 #else
@@ -866,7 +866,7 @@ public:
     /// Reset to an empty string.
     OIIO_HOSTDEVICE void clear() noexcept { m_hash = 0; }
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     /// Return a pointer to the characters.
     const char* c_str() const noexcept
     {
@@ -892,7 +892,7 @@ public:
     /// Return a hashed version of the string
     OIIO_HOSTDEVICE constexpr hash_t hash() const noexcept { return m_hash; }
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     /// Return the number of characters in the string.
     size_t size() const noexcept { return length(); }
 #endif
@@ -930,7 +930,7 @@ public:
         return m_hash != Strutil::strhash(str);
     }
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     /// Test for equality with a ustring.
     bool operator==(const ustring& str) const noexcept
     {
@@ -999,7 +999,7 @@ ustring::uhash() const noexcept
 
 
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
 inline ustring::ustring(ustringhash hash)
 {
     // The ustring constructor from a ustringhash is just a pretty
@@ -1075,7 +1075,7 @@ iequals(const std::string& a, ustring b)
 // ustring variant stof from OpenImageIO/strutil.h
 namespace Strutil {
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
 
 inline float
 stof(ustring s)

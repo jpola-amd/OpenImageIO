@@ -68,6 +68,14 @@
 //   __CUDA_ARCH__  is only defined when doing the device pass. "Do this only
 //                for code that will actually run on the GPU."
 
+// Notes on ROCm/HIP https://clang.llvm.org/docs/HIPSupport.html
+// __HIP__ : This macro is defined only when compiling HIP code. 
+//           It can be used to conditionally compile code specific to HIP, 
+//           enabling developers to write portable code
+//           that can be compiled for both CUDA and HIP.
+// __HIP_DEVICE_COMPILE__ : Defined exclusively during HIP device compilation, 
+//                          this macro allows for conditional compilation
+//                          of device-specific code. 
 
 // Define OIIO_GNUC_VERSION to hold an encoded gcc version (e.g. 40802 for
 // 4.8.2), or 0 if not a GCC release. N.B.: This will be 0 for clang.
@@ -373,7 +381,7 @@
 // always inline. On many compilers regular 'inline' is only advisory. Put
 // this attribute before the function return type, just like you would use
 // 'inline'.
-#if defined(__CUDACC__)
+#if defined(__CUDACC__) || defined(__HIP__)
 #    define OIIO_FORCEINLINE __inline__
 #elif defined(__GNUC__) || defined(__clang__) || __has_attribute(always_inline)
 #    define OIIO_FORCEINLINE inline __attribute__((always_inline))
@@ -495,7 +503,7 @@
 
 // OIIO_HOSTDEVICE is used before a function declaration to supply the
 // function decorators needed when compiling for CUDA devices.
-#ifdef __CUDACC__
+#if defined(__CUDACC__) || defined(__HIP__)
 #    define OIIO_HOSTDEVICE __host__ __device__
 #    define OIIO_DEVICE __device__
 #else
@@ -506,7 +514,7 @@
 
 // OIIO_DEVICE_CONSTEXPR is like OIIO_HOSTDEVICE, but it's `constexpr` only on
 // the Cuda device side, and merely inline (not constexpr) on the host side.
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP__)
 #    define OIIO_DEVICE_CONSTEXPR __device__ constexpr
 #else
 #    define OIIO_DEVICE_CONSTEXPR /*__host__*/ inline

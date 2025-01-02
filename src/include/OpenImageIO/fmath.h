@@ -299,7 +299,7 @@ clamp (const T& a, const T& low, const T& high)
 }
 
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
 // Specialization of clamp for vfloat4
 template<> OIIO_FORCEINLINE simd::vfloat4
 clamp (const simd::vfloat4& a, const simd::vfloat4& low, const simd::vfloat4& high)
@@ -580,7 +580,7 @@ floorfrac (float x, int *xint)
 }
 
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
 inline simd::vfloat4 floorfrac (const simd::vfloat4& x, simd::vint4 *xint) {
     simd::vfloat4 f = simd::floor(x);
     *xint = simd::vint4(f);
@@ -643,7 +643,7 @@ sincos (float x, float* sine, float* cosine)
 {
 #if defined(__GNUC__) && defined(__linux__) && !defined(__clang__)
     __builtin_sincosf(x, sine, cosine);
-#elif defined(__CUDA_ARCH__)
+#elif defined(__CUDA_ARCH__) || defined(__HIP__)
     // Explicitly select the single-precision CUDA library function
     sincosf(x, sine, cosine);
 #else
@@ -657,7 +657,7 @@ sincos (double x, double* sine, double* cosine)
 {
 #if defined(__GNUC__) && defined(__linux__) && !defined(__clang__)
     __builtin_sincos(x, sine, cosine);
-#elif defined(__CUDA_ARCH__)
+#elif defined(__CUDA_ARCH__) || defined(__HIP__)
     // Use of anonymous namespace resolves to the CUDA library function and
     // avoids infinite recursion
     ::sincos(x, sine, cosine);
@@ -819,7 +819,7 @@ void convert_type (const S *src, D *dst, size_t n, D _min, D _max)
 }
 
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__)|| defined(__HIP__))
 template<>
 inline void convert_type<uint8_t,float> (const uint8_t *src,
                                          float *dst, size_t n,
@@ -954,7 +954,7 @@ convert_type<float,half> (const float *src, half *dst, size_t n,
 #endif /* if OIIO_FMATH_HEADER_ONLY */
 #endif /* if defined(IMATH_HALF_H_) */
 
-#endif /* ifndef __CUDA_ARCH__ */
+#endif /* ifndef __CUDA_ARCH__ || __HIP__ */
 
 
 
@@ -1462,7 +1462,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE int fast_rint (float x) {
 #endif
 }
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
 OIIO_FORCEINLINE simd::vint4 fast_rint (const simd::vfloat4& x) {
     return simd::rint (x);
 }
@@ -1470,7 +1470,7 @@ OIIO_FORCEINLINE simd::vint4 fast_rint (const simd::vfloat4& x) {
 
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_sin (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // very accurate argument reduction from SLEEF
     // starts failing around x=262000
     // Results on: [-2pi,2pi]
@@ -1502,7 +1502,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_sin (float x) {
 
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cos (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // same argument reduction as fast_sin
     int q = fast_rint (x * float(M_1_PI));
     float qf = float(q);
@@ -1529,7 +1529,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cos (float x) {
 
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE void fast_sincos (float x, float* sine, float* cosine) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // same argument reduction as fast_sin
     int q = fast_rint (x * float(M_1_PI));
     float qf = float(q);
@@ -1563,7 +1563,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE void fast_sincos (float x, float* sine, float* 
 // NOTE: this approximation is only valid on [-8192.0,+8192.0], it starts becoming
 // really poor outside of this range because the reciprocal amplifies errors
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_tan (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // derived from SLEEF implementation
     // note that we cannot apply the "denormal crush" trick everywhere because
     // we sometimes need to take the reciprocal of the polynomial
@@ -1596,7 +1596,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_tan (float x) {
 /// Note that this is MUCH faster, but much less accurate than fast_sin.
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_sinpi (float x)
 {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
 	// Fast trick to strip the integral part off, so our domain is [-1,1]
 	const float z = x - ((x + 25165824.0f) - 25165824.0f);
     const float y = z - z * fabsf(z);
@@ -1634,7 +1634,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_sinpi (float x)
 /// Note that this is MUCH faster, but much less accurate than fast_cos.
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cospi (float x)
 {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     return fast_sinpi (x+0.5f);
 #else
     return cospif(x);
@@ -1642,7 +1642,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cospi (float x)
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_acos (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     const float f = fabsf(x);
     const float m = (f < 1.0f) ? 1.0f - (1.0f - f) : 1.0f; // clamp and crush denormals
     // based on http://www.pouet.net/topic.php?which=9132&page=2
@@ -1657,7 +1657,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_acos (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_asin (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // based on acosf approximation above
     // max error is 4.51133e-05 (ulps are higher because we are consistently off by a little amount)
     const float f = fabsf(x);
@@ -1670,7 +1670,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_asin (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_atan (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     const float a = fabsf(x);
     const float k = a > 1.0f ? 1 / a : a;
     const float s = 1.0f - (1.0f - k); // crush denormals
@@ -1689,7 +1689,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_atan (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_atan2 (float y, float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // based on atan approximation above
     // the special cases around 0 and infinity were tested explicitly
     // the only case not handled correctly is x=NaN,y=0 which returns 0 instead of nan
@@ -1749,7 +1749,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE T fast_log2 (const T& xval) {
 
 template<>
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_log2 (const float& xval) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // NOTE: clamp to avoid special cases and make result "safe" from large negative values/nans
     float x = clamp (xval, std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
     // based on https://github.com/LiraNuna/glsl-sse2/blob/master/source/vec4.h
@@ -1783,7 +1783,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE T fast_log (const T& x) {
     return fast_log2(x) * T(M_LN2);
 }
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP__)
 template<>
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_log(const float& x)
 {
@@ -1798,7 +1798,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE T fast_log10 (const T& x) {
     return fast_log2(x) * T(M_LN2 / M_LN10);
 }
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP__)
 template<>
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_log10(const float& x)
 {
@@ -1807,7 +1807,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_log10(const float& x)
 #endif
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_logb (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // don't bother with denormals
     x = fabsf(x);
     if (x < std::numeric_limits<float>::min()) x = std::numeric_limits<float>::min();
@@ -1820,7 +1820,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_logb (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_log1p (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     if (fabsf(x) < 0.01f) {
         float y = 1.0f - (1.0f - x); // crush denormals
         return copysignf(madd(-0.5f, y * y, y), x);
@@ -1885,7 +1885,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_exp2 (const float& xval) {
     // Clang was unhappy using the bitcast/memcpy/reinter_cast/union inside
     // an explicit SIMD loop, so revert to calling the standard version.
     return std::exp2(xval);
-#elif !defined(__CUDA_ARCH__)
+#elif !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // clamp to safe range for final addition
     float x = clamp (xval, -126.0f, 126.0f);
     // range reduction
@@ -1923,7 +1923,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE T fast_exp (const T& x) {
     return fast_exp2(x * T(1 / M_LN2));
 }
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP__)
 template<>
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_exp (const float& x) {
     return __expf(x);
@@ -1946,7 +1946,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_correct_exp (float x)
 
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_exp10 (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // Examined 2217701018 values of exp10 on [-37.9290009,37.9290009]: 2.71732409 avg ulp diff, 232 max ulp
     return fast_exp2(x * float(M_LN10 / M_LN2));
 #else
@@ -1955,7 +1955,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_exp10 (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_expm1 (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     if (fabsf(x) < 0.03f) {
         float y = 1.0f - (1.0f - x); // crush denormals
         return copysignf(madd(0.5f, y * y, y), x);
@@ -1967,7 +1967,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_expm1 (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_sinh (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     float a = fabsf(x);
     if (a > 1.0f) {
         // Examined 53389559 values of sinh on [1,87.3300018]: 33.6886442 avg ulp diff, 178 max ulp
@@ -1990,7 +1990,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_sinh (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cosh (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // Examined 2237485550 values of cosh on [-87.3300018,87.3300018]: 1.78256726 avg ulp diff, 178 max ulp
     float e = fast_exp(fabsf(x));
     return 0.5f * e + 0.5f / e;
@@ -2000,7 +2000,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cosh (float x) {
 }
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_tanh (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // Examined 4278190080 values of tanh on [-3.40282347e+38,3.40282347e+38]: 3.12924e-06 max error
     // NOTE: ulp error is high because of sub-optimal handling around the origin
     float e = fast_exp(2.0f * fabsf(x));
@@ -2017,7 +2017,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_safe_pow (float x, float y) {
     if (y == 1.0f)
         return x;
     if (y == 2.0f) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
         return std::min (x*x, std::numeric_limits<float>::max());
 #else
         return fminf (x*x, std::numeric_limits<float>::max());
@@ -2055,7 +2055,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE T fast_pow_pos (const T& x, const U& y) {
 
 // Fast cube root (performs better that using fast_pow's above with y=1/3)
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cbrt (float x) {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     float x0 = fabsf(x);
     // from hacker's delight
     float a = bitcast<float, int>(0x2a5137a0 + bitcast<int, float>(x0) / 3); // Initial guess.
@@ -2073,7 +2073,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_cbrt (float x) {
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_erf (float x)
 {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // Examined 1082130433 values of erff on [0,4]: 1.93715e-06 max error
     // Abramowitz and Stegun, 7.1.28
     const float a1 = 0.0705230784f;
@@ -2097,7 +2097,7 @@ OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_erf (float x)
 
 OIIO_FORCEINLINE OIIO_HOSTDEVICE float fast_erfc (float x)
 {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     // Examined 2164260866 values of erfcf on [-4,4]: 1.90735e-06 max error
     // ulp histogram:
     //   0  = 80.30%
@@ -2216,14 +2216,14 @@ T invert (Func &func, T y, T xmin=0.0, T xmax=1.0,
 inline OIIO_HOSTDEVICE float
 interpolate_linear (float x, span_strided<const float> y)
 {
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     OIIO_DASSERT_MSG (y.size() >= 2, "interpolate_linear needs at least 2 knot values (has %d)", int(y.size()));
 #endif
     x = clamp (x, float(0.0), float(1.0));
     int nsegs = int(y.size()) - 1;
     int segnum;
     x = floorfrac (x*nsegs, &segnum);
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP__))
     int nextseg = std::min (segnum+1, nsegs);
 #else
     int nextseg = min (segnum+1, nsegs);

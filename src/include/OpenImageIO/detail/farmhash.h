@@ -472,7 +472,7 @@ STATIC_INLINE uint64_t Rotate64(uint64_t val, int shift) {
 #endif
 
 // clang seems to define __x86_64 flags etc. even if you're compiling for gpu-device
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
 #  undef  _x86_64
 #  define _x86_64       0
 #  undef  x86
