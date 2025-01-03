@@ -238,7 +238,7 @@ rotl(T x, int s) noexcept
 }
 
 
-#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 320
+#if (defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 320) || defined(__HIP_DEVICE_COMPILE__)
 // Cuda has an intrinsic for 32 bit unsigned int rotation
 // FIXME: This should be constexpr, but __funnelshift_lc seems not to be
 // marked as such.
@@ -257,7 +257,7 @@ OIIO_DEPRECATED("use rotl() instead (2.1)")
 OIIO_FORCEINLINE OIIO_HOSTDEVICE uint32_t
 rotl32(uint32_t x, int k)
 {
-#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 320
+#if (defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 320) || defined(__HIP_DEVICE_COMPILE__)
     return __funnelshift_lc(x, x, k);
 #else
     return (x << k) | (x >> (32 - k));

@@ -150,7 +150,7 @@ namespace bjhash {
 OIIO_FORCEINLINE OIIO_HOSTDEVICE uint32_t
 rotl32(uint32_t x, int k)
 {
-#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 320
+#if (defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 320) || defined(__HIP_DEVICE_COMPILE__)
     return __funnelshift_lc(x, x, k);
 #else
     return (x << k) | (x >> (32 - k));

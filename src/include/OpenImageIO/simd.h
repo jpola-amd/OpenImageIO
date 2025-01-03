@@ -91,9 +91,9 @@
 #endif
 
 // Disable Intel SIMD intrinsics on non-Intel architectures (including
-// building for Cuda on an Intel host).
+// building for Cuda/HIP on an Intel host).
 #if defined(_M_ARM64) || defined(__aarch64) || defined(__aarch64__) \
-    || defined(__CUDA_ARCH__)
+    || defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
 #  ifndef OIIO_NO_SSE
 #    define OIIO_NO_SSE 1
 #  endif
@@ -105,14 +105,14 @@
 #  endif
 #endif
 
-#if !(defined(_M_ARM64) || defined(__aarch64) || defined(__aarch64__)) || defined(__CUDA_ARCH__)
+#if !(defined(_M_ARM64) || defined(__aarch64) || defined(__aarch64__)) || defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
 #  ifndef OIIO_NO_NEON
 #    define OIIO_NO_NEON 1
 #  endif
 #endif
 
-#if defined(__CUDA_ARCH__)
-    // Cuda -- don't include any of these headers
+#if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
+    // Cuda/HIP-- don't include any of these headers
 #elif defined(_WIN32)
 #  include <intrin.h>
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) || defined(__e2k__)
@@ -3138,7 +3138,7 @@ vfloat16 nmsub (const vfloat16& a, const vfloat16& b, const vfloat16& c); // -a*
 // Try to set the flush_zero_mode CPU flag on x86. Return true if we are
 // able, otherwise false (because it's not available on that platform).
 inline bool set_flush_zero_mode (bool on) {
-#if (defined(__x86_64__) || defined(__i386__)) && !defined(__CUDA_ARCH__)
+#if (defined(__x86_64__) || defined(__i386__)) && !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     _MM_SET_FLUSH_ZERO_MODE (on ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF);
     return true;
 #endif
@@ -3148,7 +3148,7 @@ inline bool set_flush_zero_mode (bool on) {
 // Try to set the denorms_zero_mode CPU flag on x86. Return true if we are
 // able, otherwise false (because it's not available on that platform).
 inline bool set_denorms_zero_mode (bool on) {
-#if (defined(__x86_64__) || defined(__i386__)) && !defined(__CUDA_ARCH__)
+#if (defined(__x86_64__) || defined(__i386__)) && !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     _MM_SET_DENORMALS_ZERO_MODE (on ? _MM_DENORMALS_ZERO_ON : _MM_DENORMALS_ZERO_OFF);
     return true;
 #endif
@@ -3157,7 +3157,7 @@ inline bool set_denorms_zero_mode (bool on) {
 
 // Get the flush_zero_mode CPU flag on x86.
 inline bool get_flush_zero_mode () {
-#if (defined(__x86_64__) || defined(__i386__)) && !defined(__CUDA_ARCH__)
+#if (defined(__x86_64__) || defined(__i386__)) && !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     return _MM_GET_FLUSH_ZERO_MODE() == _MM_FLUSH_ZERO_ON;
 #endif
     return false;
@@ -3165,7 +3165,7 @@ inline bool get_flush_zero_mode () {
 
 // Get the denorms_zero_mode CPU flag on x86.
 inline bool get_denorms_zero_mode () {
-#if (defined(__x86_64__) || defined(__i386__)) && !defined(__CUDA_ARCH__)
+#if (defined(__x86_64__) || defined(__i386__)) && !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
     return _MM_GET_DENORMALS_ZERO_MODE() == _MM_DENORMALS_ZERO_ON;
 #endif
     return false;

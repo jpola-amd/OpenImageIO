@@ -511,7 +511,7 @@ OIIO_NAMESPACE_BEGIN
     namespace farmhash {
     namespace inlined {
 
-#ifndef __CUDA_ARCH__
+#if !(defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__))
 #if can_use_ssse3 || can_use_sse41 || can_use_sse42 || can_use_aesni || can_use_avx
 STATIC_INLINE __m128i Fetch128(const char* s) {
   return _mm_loadu_si128(reinterpret_cast<const __m128i*>(s));
