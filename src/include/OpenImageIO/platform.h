@@ -514,7 +514,7 @@
 
 // OIIO_DEVICE_CONSTEXPR is like OIIO_HOSTDEVICE, but it's `constexpr` only on
 // the Cuda device side, and merely inline (not constexpr) on the host side.
-#if defined(__CUDA_ARCH__) || defined(__HIP__)
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
 #    define OIIO_DEVICE_CONSTEXPR __device__ constexpr
 #else
 #    define OIIO_DEVICE_CONSTEXPR /*__host__*/ inline

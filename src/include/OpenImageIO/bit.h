@@ -114,7 +114,7 @@ byteswap(T n)
 
 #if (OIIO_GNUC_VERSION || OIIO_ANY_CLANG     \
      || OIIO_INTEL_CLASSIC_COMPILER_VERSION) \
-    && !defined(__CUDACC__)
+    && !(defined(__CUDACC__) || defined(__HIP_DEVICE_COMPILE__))
 // CPU gcc and compatible can use these intrinsics, 8-15x faster
 
 template<>
@@ -173,7 +173,7 @@ byteswap(double f)
     return bitcast<double>(byteswap(bitcast<uint64_t>(f)));
 }
 
-#elif defined(_MSC_VER) && !defined(__CUDACC__)
+#elif defined(_MSC_VER) && !(defined(__CUDACC__) || defined(__HIP_DEVICE_COMPILE__))
 // CPU MSVS can use these intrinsics
 
 template<>

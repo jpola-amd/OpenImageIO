@@ -304,7 +304,7 @@ void debug(const char* fmt, Args&&... args)
 /// already as a va_list.  This is not guaranteed type-safe and is not
 /// extensible like format(). Use with caution!
 std::string OIIO_UTIL_API vsprintf (const char *fmt, va_list ap)
-#if defined(__GNUC__) && !defined(__CUDACC__)
+#if defined(__GNUC__) && !(defined(__CUDACC__) || defined(__HIP__))
     __attribute__ ((format (printf, 1, 0) ))
 #endif
     ;
