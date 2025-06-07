@@ -1,0 +1,50 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-vcpkg",
+      "displayName": "Windows with vcpkg dependencies",
+      "description": "Configure with all dependencies from vcpkg and custom Imath/Qt5",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "ZLIB_ROOT": "D:/vcpkg/installed/x64-windows",
+        "OpenJPEG_ROOT": "D:/vcpkg/installed/x64-windows",
+        "TIFF_ROOT": "D:/vcpkg/installed/x64-windows",
+        "libjpeg-turbo_ROOT": "D:/vcpkg/installed/x64-windows",
+        "pybind11_ROOT": "D:/vcpkg/installed/x64-windows",
+        "PNG_ROOT": "D:/vcpkg/installed/x64-windows",
+        "Freetype_ROOT": "D:/vcpkg/installed/x64-windows",
+        "TBB_ROOT": "D:/vcpkg/installed/x64-windows",
+        "GIF_ROOT": "D:/vcpkg/installed/x64-windows",
+        "OpenCV_ROOT": "D:/vcpkg/installed/x64-windows",
+        "Ptex_ROOT": "D:/vcpkg/installed/x64-windows",
+        "FFmpeg_ROOT": "D:/vcpkg/installed/x64-windows",
+        "Libheif_ROOT": "D:/vcpkg/installed/x64-windows",
+        "Qt5_ROOT": "C:/Qt/5.15.2/msvc2019_64/lib/cmake",
+        "fmt_ROOT": "D:/vcpkg/installed/x64-windows",
+        "JXL_ROOT": "D:/vcpkg/installed/x64-windows",
+        "OpenColorIO_ROOT": "D:/Sandbox/OpenShadingLanguage/dist",
+        "Imath_ROOT": "D:/Sandbox/OpenShadingLanguage/dist",
+        "OpenVDB_ROOT": "D:/Sandbox/OpenShadingLanguage/dist",
+        "OpenEXR_ROOT": "D:/Sandbox/OpenShadingLanguage/dist",
+        "CMAKE_PREFIX_PATH": "D:/vcpkg/installed/x64-windows",
+        "CMAKE_INSTALL_PREFIX": "D:/Sandbox/OpenShadingLanguage/dist",
+        "BUILD_TESTING": "OFF",
+        "OIIO_BUILD_TESTS": "OFF"
+      }
+    }
+  ],
+    "buildPresets": [
+        {
+        "name": "windows-vcpkg-release",
+        "displayName": "Build with vcpkg dependencies",
+        "configurePreset": "windows-vcpkg",
+        "configuration": "Release"
+        }
+    ]
+}
